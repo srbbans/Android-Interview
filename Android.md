@@ -110,8 +110,10 @@ Constructor() > onAttachtoWindow() > onMeasure() > onLayout() > onDraw() > inval
  }
 
 # Thread Vs Corotine
-    -- Program execution wait for the thread to end before finishing up. But corotine programm ends instead of waiting for any corotine.
-
+   Unlike threads, coroutines are not bound to any particular thread. 
+   A coroutine can start executing in one thread, suspend execution, and resume on a different thread. 
+   Coroutines are not managed by the operating system, but by the Kotlin Runtime. 
+   When you are sleeping a thread it is blocked for a particular period of time. So you can’t use that thread anymore until it finishes its work. In coroutines, we may suspend execution, which means that the current thread is returned to a pool and may be used, for example by another coroutine. Let’s proceed to the examples.
 
 # ROOM Database
  - @Entity anotation used on a DataClass shows it as a Table.
