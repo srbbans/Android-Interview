@@ -72,5 +72,8 @@
 - Specify mutability : 
   If your app targets Android 12 or higher, you must specify the mutability of each PendingIntent object that your app creates. To declare that a given PendingIntent object is mutable or immutable, use the PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_IMMUTABLE flag, respectively.
 
-  If your app attempts to create a PendingIntent object without setting either mutability flag, the system throws an IllegalArgumentException, and the following message appears in Logcat:
+  If your app attempts to create a PendingIntent object without setting either mutability flag, the system throws an IllegalArgumentException, and the following message appears in Logcat 
+  Strongly consider using FLAG_IMMUTABLE, only use FLAG_MUTABLE if \
+some functionality depends on the PendingIntent being mutable, e.g. if \
+it needs to be used with inline replies or bubbles.
 
