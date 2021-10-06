@@ -1,5 +1,7 @@
 # Android 12 Changes for developers
 
+-- https://developer.android.com/about/versions/12/summary
+
 - Approximate location : 
   The dialog has two sets of options, one above the
            other
