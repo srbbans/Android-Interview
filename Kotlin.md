@@ -1,4 +1,4 @@
-# Kotlin - Data classes can be inherited?
+# Kotlin - Can Data classes be inherited? - Nope
 
     Q: I need to inherit a data class A from data class B?
     
@@ -20,3 +20,9 @@
       data class A(override val data1: String): Base(data1)
 
       data class B(override val data1: String,  val data2: String): Base(data1)
+
+# Some Random Points about Kotlin
+  - Every class is final by default, means we can not inherit/extend the data class in Kotlin.
+    [https://stackoverflow.com/a/55701197/3790052]
+  - 
+
