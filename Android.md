@@ -193,4 +193,21 @@ Room.databaseBuilder(getApplicationContext(), MyDb.class, "database-name")
     Use withContext to return the result of a single task.
     Use async for results from multiple tasks that run in parallel.
 
-# 
+# Activity Launch Mode
+                     It is an instruction for android os which specify how the activity should be launch.
+#Task
+    A task is a collection of Activities that users interact with when performing a certain job. The first Activity instance in the task is the root of that task.
+
+#Back stack
+          All Activities are maintained in a stack with the order in which each Activity is launched
+
+Types of Launch Modes
+ #Standard
+         we have five Activities. A, B, C, D, and E all are defined as Standard.So, our stack can be like this: A-B-C-A-A-B-B.
+ #Single Top
+         we have five Activities. A, B, C, D.  B  is defined as single Top.
+Step 1: Launch A -> A
+Step 2: Launch B -> A-B 
+Step 3: Launch C -> A-B-C 
+Step 4: Launch B -> A-B-C-B
+Step 5: Launch B -> A-B-C-B*(onNewIntent call)
