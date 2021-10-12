@@ -1,0 +1,1209 @@
+1.	About RxJava
+RxJava is a Java VM implementation of ReactiveX, a library for composing asynchronous and event-based programs by using observable sequences.
+RxJava basically has three types of components. They are:
+Observables, Operators, and Observers
+●	What is Observable in RxJava?:  Observable is used for emitting items. Observables often don’t start emitting items until someone subscribes to them. This is a great feature because it will save your resources and also, you will have better performances of your app
+●	What is Subscriber in RxJava? : 1. Subscriber is used for consuming items in Observable. After Subscriber does his job, we can quit his function so we can save resources on our app. 2. Subscriber can also find some errors in your app, and you can handle one by one 
+●	How do Observable and Subscribers work in RxJava?: A subscriber subscribes to Observable, then Observable calls Subscriber.onNext() for any number of items. If something goes wrong, we have Subscriber.onError(), and if everything is ok, we have Subscriber.onCompleted().
+●	What are Operators in RxJava?: The operator is a method and additional step between Observable and Subscriber, where an object can be transformed, filtered or combined. They are created for solving transformations.
+●	There are 2 types of operators — interval operators and timer operators. If you use timer operators — you set up time when they need to be triggered and if you use interval operators — it will be triggered when the time comes up for them.
+●	Flowable: Flowable is similar to Observable. In this case, the Observable needs to skip some values on the basis of strategy or else it will throw an exception.
+●	Here, the flowable Observable makes sense because it handles this exception with a strategy. This strategy is called BackPressureStrategy and this exception is called MissingBackPressureException
+●	Map: Applies a function to each emitted item. It transforms each emitted item by applying a function to it.
+●	Map is easy and trivial and can be summarized in one sentence
+●	Suppose that if are using Map you can get all emission like array 1,2,3  .map(ite)
+●	fun map(){
+●	   var obj:Flowable<Int> = Flowable.just(1,2,3)
+●	   obj.map { item-> 10 * item }
+●	       .observeOn(AndroidSchedulers.mainThread())
+●	       .subscribeOn(Schedulers.io())
+●	       .subscribe({
+●	           System.out.println(it)
+●	         Log.e(TAG, "map ${it}")
+●	       })
+●	}
+●	OutPut 10,20,30
+●	
+●	
+●	
+●	FlatMap: Transform the items emitted by an Observable into Observables, that FlatMap mapper returns an observable itself, so it is used to map over asynchronous operations. 
+●	flatMap() map each emitted item from the original observable into a new observable, then merge the emitted items from these observables into a single stream
+●	Map v/s FlatMap
+●	the difference is that the map operation produces one output value for each input value, whereas the flatMap operation produces an arbitrary number (zero or more) values for each input value
+●	With Observable
+●	Returns an Observable that emits items based on applying a function that you supply to each item emitted
+●	* by the source ObservableSource, where that function returns an ObservableSource, and then merging those resulting
+●	* ObservableSources and emitting the results of this merger.
+●	With Flowable
+●	Returns a Flowable that emits items based on applying a function that you supply to each item emitted
+●	* by the source Publisher, where that function returns a Publisher, and then merging those resulting
+●	* Publishers and emitting the results of this merger.
+●	If you're familiar with LiveData, MediatorLiveData can do something very similar. ConcatMap: Transform the items emitted by an Observable into Observables. This is essentially the same thing as FlapMap(), but the order is preserved. But because ConcatMap() must wait for each observable to complete its work, technically it's not asynchronous.
+●	SwitchMap: SwitchMap() will transform items emitted by an Observable into an Observable just like ConcatMap() and FlatMap(). The difference being that it will unsubscribe previous observers once a new Observer has subscribed. Essentially this solves a limitation that both ConcatMap() and FlatMap() have.
+●	Returns a new ObservableSource by applying a function that you supply to each item emitted by the source
+●	* ObservableSource that returns an ObservableSource, and then emitting the items emitted by the most recently emitted
+●	* of these ObservableSources.
+●	ConcatMap : Returns a new Observable that emits items resulting from applying a function that you supply to each item
+●	* emitted by the source ObservableSource, where that function returns an ObservableSource, and then emitting the items
+●	* that result from concatenating those resulting ObservableSources.
+●	
+●	Single: Single is used when the Observable has to emit only one value like a response from network call. This is the most common Observable we will be using in RxJava as most of our applications involve Network Calls 
+●	Maybe: Maybe is used when the observable has to emit a value or no value. It is not recommended much to use Maybe in RxJava for Android Application Development
+●	Observer: Observer is the counter part of Observable. It receives the data emitted by Observable.
+●	An observer is received data stream emitted by Observable. Observer subscribes Observable using method subscribe(). When Observable emits data then this method of Subscriber is called onNext(). When completed successfully then this method is called onComplete(). If during this emission any exception is thrown by Observable then this method is called onError().
+●	
+●	onSubscribe(): Method will be called when an Observer subscribes to Observable.
+●	onNext(): This method will be called when Observable starts emitting the data.
+●	onError(): In case of any error, onError() method will be called.
+●	onComplete(): When an Observable completes the emission of all the items, onComplete() will be called.
+●	Disposable: Disposable is used to dispose of the subscription when an Observer no longer wants to listen to Observable. Android disposables are very useful in avoiding memory leaks.
+●	
+●	Let’s say you are making a long running network call and updating the UI. By the time the network call completes its work, if the activity / fragment is already destroyed, as the Observer subscription is still alive, it tries to update the already destroyed activity. In this case it can throw a memory leak. So using the Disposables, the un-subscription can be when the activity is destroyed.
+●	filter() operator filters the data by applying a conditional statement. The data which meets the condition will be emitted and the remaining will be ignored.
+●	https://medium.com/@factoryhr/rxjava-basic-guide-e611fdf9ac02
+●	https://riptutorial.com/rx-java/example/18804/filter-operator
+●	https://medium.com/mindorks/rxjava-types-of-observables-404d75605e35#:~:text=Flowable%20is%20similar%20to%20Observable,it%20will%20throw%20an%20exception.
+
+
+2.	Schedulers 
+●	If you have a repetitive task in your Android app, you need to consider that activities and services can be terminated by the Android system to free up resources. Therefore you can not rely on standard Java schedule like the TimerTasks class
+●	the (outdated) AlarmManager
+●	the JobScheduler API.
+●	Job scheduler API
+●	The Android 5.0 Lollipop (API 21) release introduces a job scheduler API via the JobScheduler class. This API allows batch jobs when the device has more resources available. In general this API can be used to schedule everything that is not time critical for the user
+●	AlarmManager: AlarmManager is used if the periodic jobs need to run even when the app is not in the foreground. This leverages the alarm service on the phone to cause periodic executions of a service which will run continuously until explicitly stopped.
+●	Handler: Handler is used to scheduling on a given thread after a delay or repeat tasks time to time on a thread. This is done by constructing a Handler and then “posting” runnable code to the event message queue on the thread to be processed.
+●	JobScheduler: JobScheduler enables performing background work, especially networking, in an efficient way. Jobs are scheduled based on specified criteria, such as device is charging, idle, connected to a network, or connected to an unmetered network.
+●	GcmNetworkManager: GcmNetworkManager was introduced with all the nice battery saving features from JobScheduler, but with backward compatibility and simplicity of its Service counterpart. Uses JobScheduler API behind the scenes for API level 21+, and features support for previous Android versions using Google Play Services.
+●	RxJava Schedulers
+●	RxJava is asynchronous programming. By default, RxJava is single threaded. Which means Observable notifies its Observer on which thread its subscribe() was called. So if you want to introduce multithreading into your Observable you can do by instructing Observable on which thread Observable emit data is and on which thread notify its Observer using following methods subscribeOn() and observeOn().
+●	There are many Schedulers available in Rxjava on which Observable emits data are Schedulers.io(), Schedulers.newThread(), Schedulers.computation(), Schedulers.single(), Schedulers.immediate(), Schedulers.trampoline() and Schedulers.from() For android notify on ui thread by implementing observeOn() method with AndroidSchedulers.mainThread().
+●	
+3.	Dagger2 Dependency Injection
+●	Reusability of code
+●	Ease of refactoring
+●	Ease of testing
+●	Dagger automate dependency injection. With Dagger, We don't have to write tedious and error-prone boilerplate code
+●	Dependency Injection is Simply Supplying the class dependencies from outside, the class does not creates any of its own dependencies
+●	Dagger is fully static, compile time dependency injection framework for both java and android
+●	Auto generates code based on annotations that is compiled to app source code
+●	Dagger 2 is one of the open source DI frameworks which generates a lot of boilerplate for us. It is better than the others.  It's the only one DI framework which generates fully traceable source code. It means that there is no magic in dependencies graph construction. Dagger 2 is less dynamic than the others but simplicity and performance of the generated code are on the same level as the hand-written code 
+●	This means that Class A cannot work without Class B. This also means that wherever Class A is Class B needs to be there i.e, we cannot reuse Class A without reusing Class B. So in this scenario, the Class A are called the dependents and the Class B are called the dependency. A dependent depends on its dependencies.
+●	Annotation Name
+●	@Component, @Modules, @Scope, @Qualifier, @Provides, @Binds, @IntoMap, 
+●	@Component: A component will act as a public interface for your entire dependency graph
+●	@Modules: Modules will provide under the hood dependencies to the outermost dependencies
+●	@Singleton: This indicates that only a single instance of the dependency object would be created.
+●	@Inject : This is used upon a constructor, field or a method and indicates that dependency has been requested
+●	@Scope: @Scope annotation tells dagger to create a single instance, even if <DaggerComponent>.build() is called many times. It will make the dependency work as singleton.
+●	@Qualifier: Alternative to @Named annotation is @Qualifier annotation. For creating ApplicationContext using @Qualifier, we need to create a separate @interface and use it where ever necessary.
+●	@Provides: The return type annotated with a @Provides annotation is used to associate this instantiation with any other modules of the same type. The @Singleton annotation is used to declare to Dagger that the provided object is to be only initialized only once during the entire lifecycle of the Component which uses that Module.
+●	@Binds: prevents Dagger from having to codegen and keep a separate Factory/Provider for the object, since Java doesn't give Dagger access to know that the implementation is as simple as it is. In your case
+●	@IntoMap: @IntoMap in a Provides annotated method of Dagger module class will instruct dagger to add the provided value to a map.
+
+
+4.	Kotlin Coroutines
+●	Essentially, coroutines are light-weight threads. It lets us write asynchronous, non-blocking code in a sequential way. Coroutines are managed by Thread Pool. In other words, Multiple coroutines can run on a single thread which is managed by the Thread pool. 
+On Android, coroutines are a great solution to two problems:
+1.	Long running tasks are tasks that take too long to block the main thread.
+2.	Main-safety allows you to ensure that any suspend function can be called from the main thread.
+3.	Coroutines build upon regular functions by adding two new operations. In addition to invoke (or call) and return, coroutines add suspend and resume.
+4.	There’s a special function called suspending functions in Kotlin Coroutines, we can declare the function with keyword suspend. Suspending functions can suspend the execution of a coroutine, which means it will wait until the suspending functions resume
+5.	suspend — pause the execution of the current coroutine, saving all local variables
+6.	resume — continue a suspended coroutine from the place it was paused
+7.	This functionality is added by Kotlin by the suspend keyword on the function. You can only call suspend functions from other suspend functions, or by using a coroutine builder like launch to start a new coroutine.
+8.	fun main(args: Array<String>) {
+9.	   val a=20
+10.	   val b=10
+11.	   val cal = Dog()
+12.	   GlobalScope.async {
+13.	       println("Sum ${cal.Add(a,b)}")
+14.	       println("Multiply ${cal.Multiply(a,b)}")
+15.	   }
+16.	}
+17.	open class Dog (){
+18.	   suspend fun Add (a:Int,b:Int):Int{
+19.	       return a+b
+20.	   }
+21.	}
+22.	suspend fun Dog.Multiply(a:Int,b:Int):Int{
+23.	   return a*b
+24.	}
+25.	
+26.	https://medium.com/swlh/kotlin-coroutines-in-android-basics-9904c98d4714
+
+5.	Difference async and launch
+  
+           Launch	Async
+Launch: doesn't return anything
+
+launch is used to fire and forget coroutine. It is like starting a new thread. If the code inside the launch terminated with an exception, then it is treated like an uncaught exception in a thread -- usually printed in backend JVM applications and crashes Android applications. join is used to wait for completion of the launched coroutine and it does not propagate its exception. However, a crashed child coroutine cancels its parent with the corresponding exception, too. 	Async: Returns an instance of Deferred<T>, Which has an await() function that returns 
+If you wanna use async result you will need to add .await() to your variable and this would cause a block in your main thread.
+What I mean: If you are running this on a UI thread and call async for the result it will stop the execution at the line `val resultText …` and any click would get a response or trigger anything (annoying)
+
+Launch: fire and forget                               return a value - the last println only produces an Unit	Async: perform a task and return a result 
+
+6.	Coroutines Cancel
+●	In development, as in life, we know it’s important to avoid doing more work than needed as it can waste memory and energy. This principle applies to coroutines as well. You need to make sure that you control the life of the coroutine and cancel it when it’s no longer needed
+●	विकास में, जीवन में, हम यह जानते हैं कि जरूरत से ज्यादा काम करने से बचना जरूरी है क्योंकि यह स्मृति और ऊर्जा को बर्बाद कर सकता है। यह सिद्धांत कोरटाइन्स पर भी लागू होता है। आपको यह सुनिश्चित करने की आवश्यकता है कि आप कोरआउट के जीवन को नियंत्रित करते हैं और इसे रद्द कर देते हैं जब इसकी आवश्यकता नहीं होती है
+●	When launching multiple coroutines, it can be a pain to keep track of them or cancel each individually. Rather, we can rely on cancelling the entire scope coroutines are launched into as this will cancel all of the child coroutines created
+●	कई कॉरआउट्स को लॉन्च करते समय, उन्हें ट्रैक रखने या प्रत्येक को अलग-अलग रद्द करने के लिए दर्द हो सकता है। बल्कि, हम पूरे दायरे को रद्द करने पर भरोसा कर सकते हैं, क्योंकि इसमें बनाए गए सभी बच्चे कोरआउट को रद्द कर देंगे।
+●	A cancelled child does not affect other siblings
+●	एक रद्द किया गया बच्चा अन्य भाई-बहनों को प्रभावित नहीं करता है
+
+7.	Retrofit v/s Volley
+      Volley
+Volley is a networking library it offers great features like synchronous requests, asynchronous requests, making multiple requests at the same time, ordered requests and of course caching
+●	No Automatic parsing 
+●	Caching mechanism
+●	Retry policy
+●	Inbuilt image loading support
+●	Volley has inbuilt image loading support whereas Retrofit does not provide such feature. Though other libraries like Picasso and glide can be used with Retrofit.
+●	Volley has a flexible caching mechanism whereas Retrofit does not provide support for caching.
+●	For post requests and multipart uploads retrofit has full support whereas in volley the developer has to write extra code to add that feature.
+●	
+       Retrofit 
+Retrofit is a REST client for Android, through which you can make easy to use interfaces which can turn any Android app into a powerful one.Retrofit can perform Async and sync requests with automatic JSON parsing without any effort
+●	Automatic json parsing
+●	No Caching mechanism
+●	No retry policy 
+●	No image loading
+
+8.	Recyclerview
+1. Reuses cells while scrolling
+2. Animate to list items
+3. Change the item container ( linear layout or grid layout using Layout Manager)
+4. Divider between two items
+5. Multiple views in the same listing
+
+9.	Listview v/s recyclerview
+●	Listview has a performance issue working with large datasets
+●	This problem occurs because listview tries to create as many rows the data have
+●	 Suppose we have a dataset of 100 thousand rows listview will create 100 thousand views 
+●	At once it leads to consuming a lot of memory and listview behaves laggy. 
+●	Recycler view tackles this problem very efficiently.
+●	Well, recyclerview is a just improved version of Listview.
+●	In ListView, if you don’t create a viewholder class creates views for all the rows, 
+●	Which is not good for the performance of the app,  takes more time as well as more memory. In recyclerview creating a viewholder is a must, so that only a few views are needed to show the data
+●	Vertical Scrolling.
+●	Another limitation is listview only has vertical scroll capability no Horizontal Lists. Whereas horizontal scrolling is a key concept in designing beautiful UI/UX 
+●	Animations
+●	Listview does not provide a built-in feature for animation. It’s time expensive task to incorporate custom animation in Listview
+●	ViewHolder
+●	The ViewHolder pattern allows us to make our list scrolling act smoothly. It stores list row views references and, thanks to this, calling the findViewById() method only occurs a couple of times, rather than for the entire dataset and on each bind view.
+●	LayoutManager
+●	The LayoutManager takes responsibility for measuring the placing views in recycler view. This class provides us control and flexibility over the layout and solves a major problem of list view and it lets us decide how to show items, how items should scroll. We can use the Layout manager to specify either we want a vertical scroll list or horizontal as our need
+●	ItemDecoration
+●	The ItemDecoration is used to add special-purpose boundaries, visual groups, divider to items and more. It allows the application to add a drawing and layout offset to a specific view from the data set
+●	1) ViewHolder Pattern
+●	2) Item Decoration
+●	3) LayoutManager
+●	4) Item Animator
+●	5) OnItemTouchListener
+●	The conclusion
+●	The RecyclerView gives a lot of control and power and it's much more customizable than the ListView.
+10.	Recyclerview Advance 
+adapter.notifyDataSetChanged() it's problem Latest update version 7
+When we use the notifyDataSetChanged() method it updates all the views. It's an inappropriate way of updating a list if just a few rows have changed. For example, your friend changes the status on WhatsApp then only that row should be updated instead of all the rows
+Resolve this problem 
+Android has provided a class called DiffUtil under version 7 support utils
+DiffUtil is a utility class that can calculate the difference between two lists and output a list of update operations that converts the first list into the second one
+class updateLists(var oldList:List<Contact>,var newList:List<Contact>):DiffUtil.Callback() {
+   override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+       return (oldList.get(oldItemPosition).age==newList.get(newItemPosition).age)
+   }
+   override fun getOldListSize(): Int {
+     return oldList.size
+   }
+   override fun getNewListSize(): Int {
+      return newList.size
+   }
+   override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
+       return (oldList.get(oldItemPosition).equals(newList.get(newItemPosition)))
+   } }
+
+
+11.	Navigation jetpack features
+●	The Navigation API simplifies the implementation of navigation in our apps. This API can help us manage the navigation back stack easier and reduce the boilerplate of our apps. Start using this API will simplify our navigation and this means that we don’t need that Fragment transaction anymore. Deeplinking can be implemented easier.
+●	Implementing navigation UI patterns (like navigation drawers and bottom nav) with little additional work.
+●	Type safety when passing information while navigating.
+●	Android Studio tooling for visualizing and editing the navigation flow of an app
+12.	Asynchronous data Streams
+●	Click Event, push notification, keyboard input, Reading a file, Database Access,Device Sensor Update, GPS Update, servier Response  
+
+        
+13.	Multithreading In Android
+●	Multithreading is a technique with which a program or an operating system process manages its use by more than one user at a time
+●	it’s  even used to manage multiple requests by the same user without having to have multiple of the program running in the computer
+
+14.	NinePatch (9-patch) image
+It is a resizable bitmap resource that can be used for backgrounds or other images on a device. NinePatch class permits drawing a bitmap in nine sections. The 9-patch images have an extension as .9.png. It allows extensions in 9 ways, i.e., 4 corners that are unscaled, 4 edges that are scaled in 1 axis, and the middle one that can be scaled into both axes
+
+15.	Intent (Implicit intent and an explicit intent)
+●	Intent  kind of message or information that is passed to the components. It is used to launch an activity, display a web page, send SMS, send email, content providers, broadcast receivers, services, etc
+There are two types of intents:
+ implicit intent and explicit intent. 
+them.
+●	Implicit intent: It’s when we call system default intent like send e-mail, send SMS or dial number
+
+●	Explicit intent: It is when we call our own application activity. We can also pass the information from 
+one activity to another using an explicit intent.
+●	Pending Intent
+●	A PendingIntent is a token that you give to a foreign application (e.g. NotificationManager, AlarmManager, Home Screen AppWidgetManager, or other 3rd party applications), which allows the foreign application to use your application’s permissions to execute a predefined piece of code. It specifies a task that requires to be performed in future.
+●	Sticky Intent
+●	Sticks with android, for future broadcast listeners. For example if BATTERY_LOW event occurs then intent will be stick with android so that if any future user requested for BATTER_LOW, it will be fired
+●	An intent that is used with sticky broadcast, is called as sticky intent. This intent will stick with android system for future broadcast receiver requests.
+●	sendStickyBroadcast() performs a sendBroadcast(Intent) known as sticky, i.e. the Intent you are sending stays around after the broadcast is complete, so that others can quickly retrieve that data through the return value of registerReceiver(BroadcastReceiver, IntentFilter).
+●	The sticky broadcast was deprecated in API level 21 and should not be used. They provide no security (anyone can access them), no protection (anyone can modify them), and many other problems. The recommended pattern is to use a non-sticky broadcast to report that something has changed, with another mechanism for apps to retrieve the current value whenever desired.
+16.	Activities and Lifecycle 
+Activities Lifecycle https://medium.com/@droidbyme/activity-life-cycle-of-android-2e298809df6a
+            Activities are the part of the mobile app which the user can see and interact with.
+●	OnCreate() : onCreate when the activity is first created this is where most initialization should go.
+Sach as a CreateView findViewById, binding data to next i.c, this provide also bundle  containing previous activity supply data
+●	OnStart(): onStart() calls  when the activity is becoming visible to the user as the app prepares for the activity to enter the foreground and become interactive  
+●	Sach as a there is visible Picher and drawing but user not intricate at the time this picture and drawing 
+●	OnResume(): OnResume() calls when the activity will start interacting with the user, this is an indicator that the activity became activity and ready to receive input. it’s on top of an activity stack and visible to the user.
+●	Sach as a App State in this state until something happens to tack Fockers way from the app like receiving phone call navigating to another activity and device screen tearing off
+●	OnPause(): onPause() the system calls this method as the first indication that the user is leaving your activity, it indicates that the activity is no longer in the foreground.
+●	Sach as a Activity Lunch B and that time call onPause 
+●	OnStope(): OnStope() call when you are no longer visible to the user.
+●	OnDestroy(): OnDestroy() the final call received before your activity is destroy
+●	Configuration changes
+●	 
+●	Activity Life cycle when Dialog is opened
+●	
+            
+17.	 Fragment lifecycle Home Screen Click
+●	Fragment Lifecycle 1)  Call OnPause()  2) Activity Lifecycle call OnPause()  3) Fragment Lifecycle Call OnStop()  4) Activity Lifecycle call OnStop() 
+●	Again Call App   1) Activity Lifecycle call OnRestart()  2)  Activity Lifecycle call OnStart() 3) Fragment Lifecycle call OnStart() 4)  Activity Lifecycle call OnResume() 5 Fragment Lifecycle call OnResume()
+18.	Activity V/S  Fragment 
+●	Activity
+Activity is the part where the user will interact with your application. In other words, it is responsible for creating a window to hold your UI components. (UI components and how to build a layout will be discussed in another article).
+When an activity is placed on the back stack of activities the user can navigate back to the previous activity by just pressing the back button.
+           The activity can exist independently.
+
+●	Fragment
+●	Fragment Represents a behavior or a portion of a user interface in an Activity. 
+●	You can combine multiple fragments in a single activity to build a multi-pane UI and reuse a fragment in multiple activities.
+●	Fragments are reusable, modular and can be dynamically changed at runtime 
+●	They can help us build responsive and flexible layouts
+●	Fragments are reusable pieces of UI, similar to a layout or viewGroup, and can be arranged differently based on screen size
+●	You can think of a fragment as a modular section of an activity, which has its own lifecycle,
+●	The fragment's lifecycle is directly affected by the host activity's lifecycle - in other words, a fragment cannot be instantiated alone!
+●	The layout can change based on the screen size, and it’s best to use fragments to define each layout and make the best use of the screen space to make your app user friendly
+●	When a fragment is placed in the activity we have to request the instance to be saved by calling addToBackstack() during the fragment transaction.
+●	            The fragment has to live inside the activity
+            
+            Activity And Fragment 
+Activity is an application component that gives a user interface where the user can interact. The fragment is a part of an activity, which contributes its own UI to that activity.
+For Tablet or if mobile is in landscape then Using fragment we can show two lists like the only list for show the state name and other lists will show the state description in single activity but using Activity we can't do the same thing.
+Activity is not dependent on fragment.but The fragment is dependent on Activity, it can't exist independently.
+without using a fragment in Activity we can't create multi-pane UI. but using multiple fragments in a single activity we can create multi-pane UI.
+If we create a project using only Activity then its difficult to manage but if we use fragments then the project structure will be good and we can handle it easily.
+An activity may contain 0 or multiple numbers of fragments. A fragment can be reused in multiple activities, so it acts like a reusable component in activities.
+The activity has its own life cycle but fragment has there own life cycle.
+For Activity, we just need to mention in Manifest but for fragment its not required
+
+19.	Fragment Difference add(), replace(), and addToBackStack()
+Fragment lifeCycle https://android.i-visionblog.com/android-fragments-life-cycle-612e85c047dd 
+●	Example an activity have 2 fragments and we use FragmentManager to replace/add with addToBackstack each fragment to a layout in activity
+●	Replace (replace removes the existing fragment and adds a new fragment)
+●	Replace an existing fragment that was added to a container. This is essentially the same as calling remove(android.app.Fragment) for all currently added fragments that were added with the same containerViewId and then add(int, android.app.Fragment, java.lang.String) with the same arguments given here.
+●	When you remove or replace a fragment and add the transaction to the back stack, the fragment that is removed is stopped (not destroyed). If the user navigates back to restore the fragment, it restarts. If you do not add the transaction to the back stack, then the fragment is destroyed when removed or replaced.
+●	 
+●	Add (but add retains the existing fragments and adds a new fragment that means existing fragment will be active and they won't be in 'paused' state hence when a back button is pressed onCreateView() is not called for the existing fragment(the fragment which was there before new fragment was added).
+●	Add a fragment to the activity state. This fragment may optionally also have its view (if Fragment#onCreateView returns non-null) inserted into a container view of the activity.
+●	 
+
+20.	Room Database(jetpack features)
+●	Compile-time verification of SQL queries. each @Query and @Entity is checked at the compile time, that preserves your app from crash issues at runtime and not only it checks the only syntax, but also missing tables.
+●	Boilerplate code
+●	Easily integrated with other Architecture components (like LiveData)
+●	@Entity
+●	Represents a table within the database. Room creates a table for each class that has @Entity annotation
+●	@Entity — every model class with this annotation will have a mapping table in DB
+●	foreignKeys — names of foreign keys
+●	indices — list of indicates on the table
+●	primaryKeys — names of entity primary keys
+●	tableName
+●	@ColumnInfo — allows specifying custom information about column
+●	@Dao
+●	In Room, Data Access Objects or DAOs are used to access your application’s persisted data. They are a better and modular way to access your database as compared to query builders or direct queries
+●	DAOs are responsible for defining the methods that access the database. In the initial SQLite, we use the Cursor objects. With Room, we don’t need all the Cursor related code and can simply define our queries using annotations in the Dao class.
+●	@Database
+●	Contains the database holder and serves as the main access point for the underlying connection to app’s persisted, relational data.
+●	To create a database we need to define an abstract class that extends RoomDatabase. This class is annotated with @Database, lists the entities contained in the database, and the DAOs which access them.
+●	
+●	Major problems with SQLite usage are
+●	There is no compile-time verification of raw SQL queries. For example, if you write a SQL query with a wrong column name that does not exist in a real database then it will give an exception during run time and you can not capture this issue during compile time.
+●	As your schema changes, you need to update the affected SQL queries manually. This process can be time-consuming and error-prone
+
+21.	Room vs SQLite
+●	In the case of SQLite, There is no compile-time verification of raw SQLite queries. But in Room, there is SQL validation at compile time.
+●	You need to use lots of boilerplate code to convert between SQL queries and Java data objects. But, Room maps our database objects to Java Object without boilerplate code.
+●	As your schema changes, you need to update the affected SQL queries manually. Room solves this problem.
+●	Room is built to work with LiveData and RxJava for data observation, while SQLite does not
+
+22.	Add New column in old database Room(Migration)
+●	Let’s add another column: last_update, to our user’s table, by modifying the User class. In the UsersDatabase class we need to do the following changes:
+●	1. Increase the version to 3
+●	@Database(entities = {User.class}, version = 3)
+●	public abstract class UsersDatabase extends RoomDatabase
+●	2. Add a Migration from version 2 to version 3
+●	static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+●	   @Override
+●	   public void migrate(SupportSQLiteDatabase database) {
+●	       database.execSQL("ALTER TABLE users "
+●	               + " ADD COLUMN last_update INTEGER");
+●	   }
+●	};
+●	3. Add the migration to the Room database builder:
+●	database = Room.databaseBuilder(context.getApplicationContext(),
+●	       UsersDatabase.class, "Sample.db")
+●	       .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+●	       .build();
+●	When running the app, the following steps are done:
+
+23.	How to add new Column to SQLite
+●	you can use ALTER TABLE function on your onUpgrade() method 
+●	 db.execSQL("ALTER TABLE" +TABLE_NAME+ "ADD COLUMN" + Email_ID+ "TEXT") 
+●	@Override
+●	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+●	   // If you need to add a column
+●	   if (newVersion > oldVersion) {
+●	       db.execSQL("ALTER TABLE foo ADD COLUMN new_column INTEGER DEFAULT 0");
+●	   }
+●	}
+●	
+24.	Database relations with Room
+●	Room 2.2 (now stable) we have support for all possible relations between tables: one-to-one, one-to-many and many-to-many, with one annotation: @Relation.
+●	One-to-one relations
+●	Where a person can own only one dog and a dog can have only one owner. This is a one-to-one relation. To model this in a relational database, we create two tables: Dog and Owner, where the Dog table has a reference to the owner id, or the Owner has a reference to a dog id. In Room, we create two entities
+●	@Entity
+●	data class Dog(
+●	       @PrimaryKey val dogId: Long,
+●	       val dogOwnerId: Long,
+●	       val name: String,
+●	       val cuteness: Int,
+●	       val barkVolume: Int,
+●	       val breed: String
+●	)
+●	@Entity
+●	data class Owner(@PrimaryKey val ownerId: Long, val name: String)
+●	Let’s say that we want to display the list of all dogs and their owners on the screen. To do this, we would create a DogAndOwner data class:
+●	data class DogAndOwner(
+●	       val owner: Owner,
+●	       val dog: Dog
+●	)
+●	1, ownerId2, …)
+●	To get a List<DogAndOwner> using Room, we don’t need to implement the two queries ourselves and handle the object mapping, but rather, use the @Relation annotation.
+
+●	In our example, since Dog has the owner’s information, we add the @Relation annotation to the dog variable,: specifying that the ownerId column on the parent (i.e. the Owner entity) corresponds to the dogOwnerId:
+●	data class DogAndOwner(
+●	       @Embedded val owner: Owner,
+●	       @Relation(
+●	               parentColumn = "ownerId",
+●	               entityColumn = "dogOwnerId"
+●	       )
+●	       val dog: Dog
+●	)
+
+●	Our Dao is now simplified to:
+
+●	@Transaction
+●	@Query("SELECT * FROM Owner")
+●	fun getDogsAndOwners(): List<DogAndOwner>
+●	Note: Because Room runs the two queries for us under the hood, add the @Transaction annotation, to ensure that this happens atomically.
+
+●	One-to-many relations
+●	Let’s say that an owner can have multiple dogs (yay!); we’d have a one-to-many relation between Dog and Owner. The database schema we previously defined doesn’t change — we still have the same tables, since the relating key is already in the “many” table of the relationship.
+●	Now, to display the list of owners with their dogs, we need to create a new data class to model this:
+●	data class OwnerWithDogs(
+●	       val owner: Owner,
+●	       val dogs: List<Dog>
+●	)
+●	To avoid running two separate queries, we can define a one-to-many relation between Dog and Owner, by annotating the List<Dog> with @Relation as before:
+●	data class OwnerWithDogs(
+●	       @Embedded val owner: Owner,
+●	       @Relation(
+●	               parentColumn = "ownerId",
+●	               entityColumn = "dogOwnerId"
+●	       )
+●	       val dogs: List<Dog>
+●	)
+●	The Dao becomes:
+●	@Transaction
+●	@Query("SELECT * FROM Owner")
+●	fun getDogsAndOwners(): List<OwnerWithDogs>
+
+●	Many-to-many relations
+●	Now suppose we live in a perfect world where an owner can have multiple dogs, and that a dog can have multiple owners. To model this schema, our Dog and Owner tables are not enough. Since a dog can have multiple owners, we need to have multiple entries of the same dog id, matching to different owner ids. Because dogId is the primary key in Dog, we can’t insert multiple dogs with the same id. To overcome this, we need to create an associative table (also known as cross-reference table) that keeps (dogId,ownerId) pairs:
+●	@Entity(primaryKeys = ["dogId", "ownerId"])
+●	data class DogOwnerCrossRef(
+●	       val dogId: Long,
+●	       val ownerId: Long
+●	)
+●	To implement this in Room, we need to update our OwnerWithDogs data class and tell Room that in order to get the Dogs, it needs to use the DogOwnerCrossRef associate table. We reference the table by using a Junction:
+●	data class OwnerWithDogs(
+●	       @Embedded val owner: Owner,
+●	       @Relation(
+●	               parentColumn = "ownerId",
+●	               entityColumn = "dogId",
+●	               associateBy = Junction(DogOwnerCrossRef::class)
+●	       )
+●	       val dogs: List<Dog>
+●	)
+●	In our Dao, we need to select from Owners and return the right data class:
+●	@Transaction
+●	@Query("SELECT * FROM Owner")
+●	fun getOwnersWithDogs(): List<OwnerWithDogs>
+●	Best Example Linke https://medium.com/@florina.muntenescu
+25.	OutOfMemoryError shows images of large size say 4mb
+As mentioned by Aleksey, you can add below entities in your manifest file android:hardwareAccelerated="false" , android:largeHeap="true" it will work for some environment's.
+26.	App Kill Background Service Manage
+●	WorkManager handles background work that needs to run when various constraints are met, regardless of whether the application process is alive or not. Background work can be started when the app is in the background, when the app is in the foreground, or when the app starts in the foreground but goes to the background. Regardless of what the application is doing, background work should continue to execute, or be restarted if Android kills its process.
+27.	Android Services 
+Services lifecycel  https://androidclarified.com/android-service-lifecycle-and-working/
+●	A Service is an application component. that can perform long-running operations in the background, like that in the Music app  and it doesn't provide a user interface.
+●	where we run the app in the background and use other applications of the mobile parallelly. A service can essentially take two states 
+●	Started Service :
+●	A service becomes started only when an application component calls startService(). 
+●	It performs a single operation and doesn’t return any result to the caller.
+●	 Once this service starts, it runs in the background even if the component that created it destroys.
+●	 This service can be stopped only in one of the two cases:
+1.	By using the stopService() method.
+2.	By stopping itself using the stopSelf() method
+
+●	Bound Service: 
+●	Multiple clients can connect to the service at once. 
+●	However, the system calls your service’s onBind() method to retrieve the IBinder only when the first client binds. 
+●	The system then delivers the same IBinder to any additional clients that bind, without calling onBind() again
+●	A service is bound only if the application component binds to using bindService(). 
+●	gives a client-server relation that the components interact with the service. 
+●	The components can send requests to services and get results.
+●	This service runs in the background as long as another application is bound to it. 
+●	Or it can be unbound according to our requirement by using the unbindService() method.
+
+ 
+ 
+●	IntentService
+●	An intent service is a derived class or child class of service
+●	IntentService doesn’t require to create a separate thread
+●	The intent service class performs operations on background thread so there is no need to create new thread to use it
+●	There’s an additional service class that extends Service class,
+●	 IntentService Class.  base class for services to handle asynchronous requests.
+●	 It enables running an operation on a single background. 
+●	It executes long-running programs without affecting any user’s interface interaction.
+●	 Intent services run and execute in the background
+●	Certain important features of Intent are :
+
+●	It queues up the upcoming request and executes them one by one.
+●	Once the queue is empty it stops itself, without the user’s intervention in its lifecycle.
+●	It does proper thread management by handling the requests on a separate thread.
+
+●	Foreground Services:
+●	Foreground service is used when your operation should be noticed by the user. 
+●	For example playing music or downloading a file
+●	Foreground services are those services that are visible to the users. 
+●	The users can interact with them at ease and track what’s happening. 
+●	These services continue to run even when users are using other applications.
+●	You should only use a foreground service when your app needs to perform a task that is noticeable by the user even when they’re not directly interacting with the app. For this reason, foreground 
+●	 If your app targets API level 26 or higher, the system imposes restrictions on running background services when the app itself isn’t in the foreground. 
+●	In most cases like this, your app should use a scheduled job instead
+●	In the new android versions, even the service doesn't run indefinitely. Every operation except foreground service stops when the device enters
+●	services must show a status bar notification with a priority of PRIORITY_LOW or higher, which helps ensure that the user is aware of what your app is doing. 
+28.	Thread 
+●	whenever an android app starts Linux OS run a process (only one per app) and that process will initiate a thread(as android framework is single threaded) to maintain the whole UI work named Main Thread or UI Thread
+●	A thread is a lightweight subprocess. It is a separate path of execution because each thread runs in a different stack frame. A process may contain multiple threads. Threads share the process resources, but still, they execute independently
+●	With this single process you may start as many threads you want but the only restriction is that you will not be able to run or accomplish any ui task. So, please remember that we have an issue here that
+29.	Handler
+●	If you need to update the UI from another main Thread, you need to synchronize with the main thread. Because of this restrictions and complexity
+●	A Handler allows communicating back with UI thread from other background thread. This is useful in android as android doesn’t allow other threads to communicate directly with UI thread
+●	A Handler allows you to send and process Message and Runnable objects associated with a thread’s MessageQueue. Each Handler instance is associated with a single thread and that thread’s message queue
+●	val handler = Handler() // write in onCreate function
+●	handler.post(Runnable {
+●	   textView.setText(stringBuilder)
+●	})
+●	
+30.	Looper
+●	Looper is a worker that keeps a thread alive, loops through MessageQueue and sends message to the corresponding handler to process
+●	A Looper is a class used to loop through the Message Queue attached to the Thread. By default, a thread halts when the execution completes. But, for Example, if we take Android’s Main thread, it should not halt upon execution.
+●	Rather it should loop through the runnables(Messages) that its assigned in order to work properly. For more info, refer to this
+
+31.	Handler Thread
+●	HandlerThreads run outside of your activity’s lifecycle, so they need to be cleaned up properly or else you will have thread leaks.
+●	Android has provided HandlerThread(subclass of Thread) to streamline the process
+32.	Runnable v/s Handler
+●	A Handler allows you to send and process Message and Runnable objects associated with a thread's MessageQueue. Each Handler instance is associated with a single thread and that thread's message queue.
+●	 to schedule messages and runnables to be executed at some point in the future
+●	 to enqueue an action to be performed on a different thread than your own.
+
+33.	Service  v/s Thread
+
+Service	Thread	Asynctask
+Service is a component of android which performs long running operation in background, mostly without having UI	Thread is a OS Level feature that allows you to do some operation in the background.
+Though conceptually both looks similar there are crucial differentiation	
+If it is destroyed while performing its job, in the middle by android due to low memory scenario. Then android will make sure that it will restart your service, if you have returned START_STICKY or STRART_REDELIVER from onStartCommand()	If it is destroyed by android in the middle due to low memory, then android will not guarantee to restart it again. That means user lost his half work	
+Service is a component of android, so it has priority levels to be considered while destroying an application to restart it again. That means user lost his half work	Thread is not a component of android,so android will not take thread priority into consideration while killing an application due to low memory  	
+
+34.	Thread sleep() & Wait() method 
+       Sleep() Method                                                                               Wait() method
+The sleep() method of Thread class is used to sleep a thread for the specified amount of time.	wait() wait until someone calls the notify()
+Public static void sleep(long milliseconds)throws InterruptedException	Wait() method forces the current thread to wait until some other thread invokes notify() or notifyAll() on the same object
+wait() is a non-static method and sleep() is a static method.	wait() is an object class method and sleep() is a thread class method.
+	sleep() – for time-synchronization, wait() – for multi-thread-synchronization.
+The wait() method is defined in Object class.	The sleep() method is defined in Thread class.
+The wait() method releases the lock.	The sleep() method doesn't release the lock
+
+
+35.	Design Patterns
+Design patterns are reusable solutions to the most commonly occurring software problems. Design Patterns use object-oriented concepts such as decomposition, inheritance, and polymorphism.
+They can improve the reusability and extensibility of Android apps. It means you do not need to write the same code again at various places, and also you can be able to add other features to your app much more easily than general coding. Therefore, Design Patterns can increase speed in application development in Android.
+
+Design patterns can be divided into the three sections:
+●	Creational Design Patterns deliver solutions for creating classes, objects (Singleton, Factory, Builder, etc.)
+●	Structural Design Patterns are about arrangement of classes and objects (e.g. Composite, Facade, Adapter)
+●	Behavioral Design Patterns give us ways to communicate between objects and classes (Command, Observer, Strategy, etc.)
+
+
+36.	Architecture components
+●	Lifecycle
+●	LiveData
+●	ViewModel
+●	Room
+●	Paging Library
+
+37.	LiveData(jetpack features)
+●	LiveData is a LifeCycle-aware observable, it can be observed for changes by an Observer which is associated by a LifeCycleOwner.
+●	It always updates the active observers, those their LifeCycle is at least STARTED or RESUMED. If the observer’s associated LifeCycle is DESTROYED, the observer will be removed and will no longer receive updates from the LiveData object, thus avoiding memory leaks
+●	Even if the Activity/Fragment is stopped and the observers become inactive, LiveData makes sure that the observers receive the latest data when they become active again
+●	We know that ViewModels are used to communicate the data to the View. Using ViewModels alone can be a tedious and costly operation since we need to make multiple calls each time the data has to alter the View. Plus we need to store the data Model at different places.
+●	LiveData is based on the Observer Pattern and makes the communication between the ViewModel and View easy.
+●	It observes for data changes and updates the data automatically instead of us doing multiple calls in adding and deleting data references from multiple places (for example SQLite, ArrayList, ViewModel).
+
+38.	MutableLiveData
+●	MutableLiveData is just a class that extends the LiveData type class.
+●	MutableLiveData is commonly used since it provides the postValue(), setValue() methods publicly, something that LiveData class doesn’t provide.
+●	LiveData/MutableLiveData is commonly used in updating data in a RecyclerView from a collection type(List, ArrayList etc).
+
+39.	setValue() V/s postValue()
+●	setValue(): Sets the value. If there are active observers, the value will be dispatched to them. This method must be called from the main thread.
+●	postValue(): Posts a task to a main thread to set the given value. If you called this method multiple times before a main thread executed a posted task, only the last value would be dispatched
+●	suppose you want to update some value using the LiveData. While using the Main thread to change the data, you should use the setValue() method by u of the MutableLiveData class and while using the background thread to change the LiveData, you should use the postValue() method of the MutableLiveData class.
+●	postValue(): method is to post or add a task to the main thread of the application whenever there is a change in the value. And the value will be updated whenever the main thread will be executed
+●	setValue(): method is used to set the changed value i.e. the change value will be dispatched to the active observer of the application. This setValue() method must be called from the main thread
+40.	LifecycleOwner v/s LifecycleObserver
+●	LifecycleOwner:  Response to the change in lifecycle status of other UI components 
+●	Package for Lifecycle- aware Components: Android.arch.lifecycle Lifecycle class: Holds info about       lifecycleOwner
+●	Lifecycle object uses enumeration to track Lifecycle status : 
+➔	Event
+➔	State
+LifecycleOwner provides Lifecycle status  to Lifecycle _aware Components
+LifecycleObserver registers the Lifecycle state to response and performs an action 
+41.	ViewModel (jetpack features)
+●	A ViewModel is a class that manages the retrieval and the display of data to an Activity or a Fragment, this is achieved while considering the life cycle.
+●	Usually the data is exposed from the ViewModel in the form of LiveData that’s observed by the UI components
+●	A ViewModel survives configuration changes of the associated Activity/Fragment, so if an activity is destroyed due to configuration change (screen rotation for example) its ViewModel will not be re-created, instead the same instance of the ViewModel will be retained, the advantage of that is for example if the ViewModel fetches some data from a remote source before the configuration change, the data will survive the configuration change and there will be no need to re-fetch again.
+●	1. You meant to navigate away permanently: The user navigates away or explicitly closes the activity by pushing the back button or triggering some code that calls finish(). The activity is permanently gone.
+●	2. There is a configuration change: The user rotates the device or does some other configuration change. The activity needs to be immediately rebuilt.
+●	3. The app is put in the background and its process is killed: This happens when the device is running low on memory and needs to quickly free some up. When the user navigates back to your app, the activity will need to be rebuilt.
+●	In situations , you want to rebuild the activity. ViewModels have always helped handle  because the ViewModel is not destroyed on a configuration change; but in this situation the ViewModel is destroyed as well, so you actually need to save and restore data using the onSaveInstanceState callback in your activity. I go into this tricky distinction in much greater detail in ViewModels
+
+●	The ViewModel class is designed to store and manage UI-related data in a lifecycle conscious way. The ViewModel class allows data to survive configuration changes such as screen rotations.
+●	The Android framework manages the lifecycles of UI controllers, such as activities and fragments. The framework may decide to destroy or re-create a UI controller in response to certain user actions or device events that are completely out of your control
+●	Saved State Module : This is done using a SavedStateHandle, which is very similar to a Bundle; it’s a key-value map of data. This SavedStateHandle “bundle” is in the ViewModel and it survives background process death. Any data you had to save before in onSaveInstanceState can now be saved in the SavedStateHandle. For example, the id of a user is something you might store in the SavedStateHandle.
+●	Shared between multiple UI components
+●	Another interesting feature of ViewModel is that a ViewModel can be shared between multiple UI components, for example two fragments can share the same ViewModel, this simplifies the communication between them so instead of communication through call backs, each fragment can communicate with the ViewModel and both fragments will end with the same updated data
+●	https://medium.com/androiddevelopers/viewmodels-with-saved-state-jetpack-navigation-data-binding-and-coroutines-df476b78144e
+●	ViewModel Save Step
+ 
+class MyViewModel(state : SavedStateHandle) : ViewModel() {
+
+    // Keep the key as a constant
+    companion object {
+        private val USER_KEY = "userId"
+    }
+    
+    private val savedStateHandle = state
+    
+    fun saveCurrentUser(userId: String) {
+        // Sets a new value for the object associated to the key.
+        savedStateHandle.set(USER_KEY, userId)
+    }
+    
+    fun getCurrentUser(): String {
+        // Gets the current value of the user id from the saved state handle
+        return savedStateHandle.get(USER_KEY)?: ""
+    }
+}
+
+
+●	 Data Get Step
+public class SavedStateActivity extends AppCompatActivity 
+   private SavedStateViewModel mSavedStateViewModel;
+
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.saved_state_activity);
+
+       // Obtain the ViewModel
+       mSavedStateViewModel = new ViewModelProvider(this).get(SavedStateViewModel.class);
+
+       // Show the ViewModel property's value in a TextView
+       mSavedStateViewModel.getName().observe(this, new Observer<String>() {
+           @Override
+           public void onChanged(String savedString) {
+               ((TextView)findViewById(R.id.saved_vm_tv))
+                       .setText(getString(R.string.saved_in_vm, savedString));
+           }
+       });     
+   }
+}
+●	  
+
+
+42.	MVVM
+●	The MVVM (Model-View-ViewModel) pattern helps to completely separate the business and presentation logic from the UI, and the business logic and UI can be clearly separated for easier testing and easier maintenance, ViewModel and Model. MVVM seems very similar to the Model-View-Presenter pattern, because both of them do a great job in abstracting the view’s state and behavior. The Presentation Model abstracts a View independent from a specific user-interface platform, whereas the MVVM pattern was created to simplify the event driven programming of user interfaces.
+●	If the MVP pattern meant that the Presenter was telling the View directly what to display, in MVVM, ViewModel exposes streams of events to which the Views can bind to. Like this, the ViewModel does not need to hold a reference to the View anymore, like the Presenter is. This also means that all the interfaces that the MVP pattern requires, are now dropped.
+●	The Views also notify the ViewModel about different actions. Thus, the MVVM pattern supports two-way data binding between the View and ViewModel and there is a many-to-one relationship between View and ViewModel. View has a reference to ViewModel but ViewModel has no information about the View. The consumer of the data should know about the producer, but the producer — the ViewModel — doesn’t know, and doesn’t care, who consumes the data
+●	
+●	// Create a TaskListViewModel instance
+●	TaskListViewModel taskListViewModel = ViewModelProviders.of(this).get(TaskListViewModel.class);
+ 
+●	DataModel
+I.	The DataModel exposes data easily consumable through event streams — RxJava’s Observables. It composes data from multiple sources, like the network layer, database or shared preferences and exposes easily consumable data to whomever needs it. The DataModels hold the entire business logic.
+II.	Our strong emphasis on the single responsibility principle leads to creating a DataModel for every feature in the app. For example, we have an ArticleDataModel that composes its output from the API service and database layer. This DataModel handles the business logic ensuring that the latest news from the database is retrieved, by applying an age filter.
+
+●	ViewModel
+I.	The ViewModel is a model for the View of the app: an abstraction of the View. The ViewModel retrieves the necessary data from the DataModel, applies the UI logic and then exposes relevant data for the View to consume. Similar to the DataModel, the ViewModel exposes the data via Observables.
+II.	We learned two things about the ViewModel the hard way:
+III.	The ViewModel should expose states for the View, rather than just events. For example, if we need to display the name and the email address of a User, rather than creating two streams for this, we create a DisplayableUser object that encapsulates the two fields. The stream will emit every time the display name or the email changes. This way, we ensure that our View always displays the current state of the User.
+IV.	We should make sure that every action of the user goes through the ViewModel and that any possible logic of the View is moved in the ViewModel.
+
+
+
+●	Conclusion
+MVVM combines the advantages of separation of concerns provided by MVP, while leveraging the advantages of data bindings. The result is a pattern where the model drives as many of the operations as possible, minimizing the logic in the view.
+
+43.	MVP & MVVM
+●	In MVP, Presenter is responsible for view data updates as well as data operations where as in MVVM, 
+●	ViewModel does not hold any reference to View. It is the View’s responsibility to pick the changes from ViewModel. This helps in writing more maintainable test cases since ViewModel does not depend upon View
+●	In MVP, there is one-to-one mapping between the View and Presenter, 
+●	MVVM, the relationship is one-to-many between the View and ViewModel.
+●	MVP is used primarily for Windows Forms and Windows Phone applications 
+●	 MVVM is designed for Silverlight,(Windows Presentation Foundation) WPF, AngularJS, etc.
+
+MVC	MVP	MVVM
+Controller is the entry point to the Application	View is the entry point to the Application	View is the entry point to the Application
+One to many relationships between Controller & View	One to One mapping between View & Presenter	One to many relationships between View & View Model
+View Does not have reference to the Controller	View have references to the Presenter	View have references to the View-Model
+View is aware of the Model	View is not aware of the Model	View is aware of the Model
+Smalltalk, ASP.Net, MVC	Windows forms	Silverlight, WPF, HTML5, with AngularJS
+MVC is Old Model	MVP (more modular because of its low-coupling. Presenter is a mediator between View and Model)	MVVM (Two-way binding between VM and UI component, more automated than MVP)
+
+
+MVP	MVVM
+Actually, MVP pattern is the successor of older Model View Controller (MVC) architecture. They created this, because there were problems with redesign, code modification, testing and better UI. This patterns divides the application code in three layers.
+
+
+Presenter has reference to both View & Model	ModelView-ViewModel main feature lies in data connection. MVVM pattern is a hit in WPF, Silverlight, and sometimes JS environments. With only a tiny code piece in build.gradle file you are able to use it.
+Let’s put together the essentials of MVP vs MVVM to compare. We should also stress that we aren’t advocating for one or pattern.
+View Presenter one to one mapping makes it non reusable
+Possibility of Presenter becoming Bloated is 
+Very high 	Code metrics: MVP may produce more classes and Java code. In MVVM there are more Java classes but less code per class.
+To Test Presenter, you will have to mock view & Model 
+Unit Testing of Presenter becomes bit complex due to duel dependency 	Maintainability: MVP is easy to learn, amend, add features. Adding new features with MVVM may require some experience with the library.
+MVP breaks one of major rule of clean code 
+architecture	Logic: in MVP the View is actually your application while Presenter handles the app flow. In MVVM code classes (ViewModel) are the application, while the View is the interface allowing users to interact with the app.
+Even right now we don’t have model to presenter dependency but we do have problem with presenter to view 
+	Data input: Begins with the View in MVP, not the Presenter. The input in MVVM begins with the View, not the ViewModel.
+
+
+
+44.	MVP 
+        Model-View-Presenter Pattern
+●	 Model — the data layer. Responsible for handling the business logic and communication with the network and database layers.
+●	View — the UI layer. Displays the data and notifies the Presenter about user actions.
+
+●	Presenter — retrieves the data from the Model, applies the UI logic and manages the state of the View, decides what to display and reacts to user input notifications from the View.
+
+●	View and the Presenter work closely together, they need to have a reference to one another. To make the Presenter unit testable with JUnit, the View is abstracted and an interface for it used. The relationship between the Presenter and its corresponding View is defined in a Contract interface class, making the code more readable and the connection between the two easier to understand.
+●	Conclusion
+●	The Model-View-Controller pattern has two main disadvantages: firstly, the View has a reference to both the Controller and the Model; and secondly, it does not limit the handling of UI logic to a single class, this responsibility being shared between the Controller and the View or the Model. The Model-View-Presenter pattern solves both of these issues by breaking the connection that the View has with the Model and creating only one class that handles everything related to the presentation of the View — the Presenter: a single class that is easy to unit test.
+●	https://medium.com/upday-devs/android-architecture-patterns-part-2-model-view-presenter-8a6faaae14a5
+●	 
+45.	MVC and MVP
+
+  Model View Controller
+
+●	Controllers are behavior based and can share multiple views.
+●	View can communicate directly with Model
+
+Model View Presenter
+●	View more separated from Model. The Presenter is the mediator between Model and View.
+●	Easier to create unit tests
+●	Generally there is a one to one mapping between View and Presenter, with the possibility to use multiple Presenters for complex Views
+●	Listen to user action and model updates
+●	Updates model and view as well
+
+46.	MVC
+ 
+ 
+
+47.	FlatMap and Map
+●	FlatMap is used to combine all the items of lists into one list.
+●	Map is used to transform a list based on certain conditions.
+●	Map Returns a list containing the results of applying the certain set of transformation to each element in the original collection
+●	FlatMap Returns a single list of all elements yielded from results of applying certain condition on each element of original collection
+48.	Kotlin support language
+●	Procedural Programming
+●	OOPS
+
+49.	val and var
+●	val and var both are used to declare a variable.
+●	var, a mutable, non-final variable. Once initialized, we're free to mutate the data held by the variable
+●	val keyword works much in the same as the var keyword, but with one key difference – Val variable is read-only. The use of val is much like declaring a new variable in Java with the final keyword
+●	var is like a general variable and can be assigned multiple times
+●	val is a constant variable and can not be assigned multiple times and can be Initialized only single time and is known as the immutable variable in Kotlin
+50.	Lazy and lateinit in Kotlin
+●	lateinit: is a modifier used with var and is used to set the value to the var at a later point.
+●	lazy: is a method or rather say lambda expression. It’s set on a val only. The val would be created at runtime when it’s required.
+51.	inline and infix
+●	Inline functions are used to save us memory overhead by preventing object allocations for the anonymous functions/lambda expressions called. Instead, it provides that functions body to the function that calls it at runtime. This increases the bytecode size slightly but saves us a lot of memory.
+●	infix functions on the other are used to call functions without parentheses or brackets. Doing so, the code looks much more like a natural language.
+
+52.	init in Kotlin
+●	init is the initialiser block in Kotlin. It’s executed once the primary constructor is instantiated. If you invoke a secondary constructor, then it works after the primary one as it is composed in the chain
+53.	Scope functions
+●	{let, run, with, apply, also}
+●	let.{ }:
+●	Let scope function is used to apply operations on an object and finally return the lambda expression from that scope function. The return type can also be void.
+●	Referenced by -> it
+●	Returns -> last statement
+●	Use case -> Null checks
+●	Mostly used for null checks, when applying ?.let on an object, we can rest safe that every time we access that object inside the scope function, the object will be not null. To reference the object inside the scope function, we use the keyword it.
+var cardNumber: String? = "1233 1231"
+fun printCard() {
+   // yager aap ? use karten hain to in case variables null hota hai to aap ka let{} ka under ka statement call nhi hoga
+   // yager aap double-bang (!!) operator? ka ues karten hain or variables null hota hai to null point exception error dega
+   cardNumber?.let {
+       // Everything executed inside this block will be null safe.
+       print("The length of the card number is ${it.length}")
+   }
+}
+
+●	Run
+●	Referenced by -> this
+●	Returns -> last statement
+●	The “run” operator is similar to the “let” operator in terms of accepting a return value that is different from the object on which the scope function is being applied to. Hence, a “run” operator can be used to initialize an object and return the result of it.
+●	Note  that run returns the last statement of the function. So it is useful when you and need to run certain operations over an object, and finally return one last operation
+open class Person(var Name:String){
+   fun fullName()= "$Name "
+}
+fun RunScope(){
+      var namej= Person("Android").run {
+          return@run "User Name:= ${this.Name} "
+      }
+      println(namej)
+  }
+
+●	With 
+●	Referenced by -> this
+●	Returns -> last statement
+●	Use case -> Run multiple operations on an object
+●	With :  with The “with” operator is completely similar to the run operator that we just discussed. It also refers to the context of the object as “this”, similar to how the “run” operator uses it
+open class Person(var Name:String){
+   fun fullName()= "$Name "
+
+}
+fun RunScope(){
+      var namej= with(Person("Android")) {
+          return@with "User Name:= ${this.Name} "
+      }
+      println(namej)
+  }
+
+●	Also
+●	Referenced by -> it
+●	Returns -> same object
+●	Use case -> Additional actions that don't alter the object, such as debug info.
+●	The “also” function is similar to the let functionality only in terms of referring to the context of the object as “it” and not “this” and also in providing null safety checks
+●	we also need to log additional info.
+●	You may ask yourself, can´t we log the info inside the apply function? Well yes, you can, but we would be missing the whole point of using scope functions, improving readability
+open class Person(var Name:String){
+   fun fullName()= "$Name "
+
+}
+fun RunScope(){
+      var namej= Person("Android").also{
+          "User Name:= ${it.Name} "
+
+      }.run {
+          this.Name
+      }
+      println(namej)
+  }
+
+
+●	Apply
+●	Referenced by -> this
+●	Returns -> same object
+●	Use case -> Initialize and configure an object
+●	apply” does not accept a return statement. The apply function is similar to the run functionality only in terms of referring to the context of the object as “this” and not “it” and also in providing null safety checks
+●	Specifically for Android Development, "apply" can be useful in many cases. We have many scenarios where we should return an instance of Intent or an Alert Dialog etc., by adding specific attributes to them. Let's take the example of an intent here:
+open class Person(var Name:String){
+   fun fullName()= "$Name "
+
+}
+fun RunScope(){
+      var namej= Person("Android").apply{
+          "User Name:= ${this.Name} "
+      }
+      println(namej)
+  }
+
+// Normal approach
+fun createIntent(intentData: String, intentAction: String): Intent {
+   val intent = Intent()
+   intent.action = intentAction
+   intent.data = Uri.parse(intentData)
+   return intent
+}
+
+// Improved approach, by using apply
+fun createIntent(intentData: String, intentAction: String) = Intent().apply {
+           action = intentAction
+           data = Uri.parse(intentData)
+       }
+
+
+
+54.	Const vs Val 
+●	val keyword must be used to declare for run time values 
+●	The val keyword is also used for read-only properties
+●	val properties can be initialised at the runtime also
+●	So, we can assign a val variable to a function or to some class.
+●	Const keyword must be used to declare compile time values.
+●	Const: The const keyword is used to declare those properties which are immutable in nature i.e. these properties are read-only properties.
+●	But, the value of these properties must be known at the compile-time only and this is the reason const is also known as Compile-time constant. So, no runtime assignment of values is allowed in const variables.
+●	A const cannot be used with a var.
+●	A const is not applicable on a local variable
+●	Where Use Const 
+●	You just have to put your const outside your class declaration.
+●	Two possibilities: Declare your const in your class file (your const have a clear relation with your class)
+●	Instead define the const in object.
+●	must be initialized with a String type or primitive type
+●	Drawbacks 
+●	So, you can't assign a const variable to a function or to some class because in this case the variable will be initialised at the runtime and not at compile-time
+●	object Data{
+●	        const val TABLE_USER_ATTRIBUTE_EMPID = "_id"
+●	        const val TABLE_USER_ATTRIBUTE_DATA = "data"
+●	}
+●	
+
+55.	Features of Kotlin 
+●	Extension Functions
+●	Null Safety
+●	Smart casts
+●	Ranges Operator
+●	Operator Overloading
+●	Data classes
+●	Companion Objects
+●	Coroutines
+●	etc.
+
+56.	Ranges Operator
+●	Ranges operator helps to iterate through a range
+for (i in 1..15)
+   print(i)
+for (i in 1..15)
+   print(i)
+
+
+57.	Data class in Kotlin
+●	In Kotlin you just need to add the data keyword on the class and all of the above would automatically be created under the hood.
+●	A data class is a class that only contains state and does not perform any operation.
+●	The advantage of using data classes instead of regular classes is that Kotlin gives us an immense amount of self-generated code
+●	Data class holds the basic data types. It does not contain any functionality
+●	The properties declared in the constructor: this technically is not exclusive to a data class, but it avoids all the boilerplate of getters and setters, in addition to the constructor
+●	Data classes are those classes which are made just to store some data. In Kotlin
+●	A data class is a class in Kotlin created to encapsulate all of the above functionality in a succinct manner.
+●	When we specify the data keyword in our class definition, Kotlin automatically generates field accessors, hashCode(), equals(), toString(), as well as the useful copy() and componentN() functions (more on these later).
+●	All primary constructor parameters need to be marked as val or var;
+●	Data classes cannot be abstract, open, sealed or inner
+●	
+58.	higher order function
+●	A higher order function is a function that accepts or returns another function. In Kotlin, functions are treated as first class citizens so you can assign them to variables and pass them to other functions as parameters. This can be achieved by using lambda expressions or function references
+59.	Inline function
+●	Let’s say that you use SharedPreferences a lot in your app so you create this utility function to reduce the boilerplate every time you write something in your SharedPreferences:
+●	बता दें कि आप अपने ऐप में बहुत सारे SharedPreferences का उपयोग करते हैं, इसलिए जब भी आप अपने SharedPreferences में कुछ लिखते हैं, तो बॉयलरप्लेट को कम करने के लिए यह उपयोगिता फ़ंक्शन बनाते हैं:
+●	To improve the performance of our app we can avoid the new function object creation, by using the inline keyword
+●	हमारे ऐप के प्रदर्शन को बेहतर बनाने के लिए हम इनलाइन कीवर्ड का उपयोग करके नए फ़ंक्शन ऑब्जेक्ट निर्माण से बच सकते हैं
+●	Because of the inline keyword, the compiler copies the content of the inline function to the call site, avoiding creating a new Function object.
+●	इनलाइन कीवर्ड के कारण, कंपाइलर कॉल फ़ंक्शन साइट की सामग्री की प्रतिलिपि बनाता है, एक नया फ़ंक्शन ऑब्जेक्ट बनाने से बचता है।
+●	 If you have multiple functions as parameters and you only need to keep a reference to one of them, then you can mark it as noinline.
+●	यदि आपके पास पैरामीटर के रूप में कई कार्य हैं और आपको केवल उनमें से किसी एक का संदर्भ रखना है, तो आप इसे noinline के रूप में चिह्नित कर सकते हैं।
+●	By using noinline, the compiler will create a new Function object only for that specific function, but the rest will be inlined.
+●	Noinline का उपयोग करके, कंपाइलर केवल उस विशिष्ट फ़ंक्शन के लिए एक नया फ़ंक्शन ऑब्जेक्ट बनाएगा, लेकिन बाकी इनलाइन होगा।
+60.	Extension functions
+●	Extension functions are like extensive properties attached to any class in Kotlin. By using extension functions, you can add some methods or functionalities to an existing class even without inheriting the class
+●	An extension function allows you to extend a classes functionality without needing to edit (or have access to) the class itself
+●	
+●	fun Main {
+●	 
+●	   fun main(args: Array<String>) {
+●	       val a = 10
+●	       val b = 20
+●	       var cal = Calculator()
+●	       println(cal.Add(a, b))
+●	       println(cal.substract(a, b))
+●	       println(cal.Multiply(a, b))
+●	   }
+// multiply is an extension function to the class Calculator
+●	   fun Calculator.Multiply(a: Int, b: Int): Int {
+●	       return a * b
+●	   }
+●	   class Calculator() {
+●	       fun Add(a: Int, b: Int): Int {
+●	           return a + b
+●	       }
+●	       fun substract(a: Int, b: Int): Int {
+●	           return a - b
+●	       }
+●	   }
+●	}
+●	
+61.	Null Safety in Kotlin 
+●	Null Safety feature allows removing the risk of occurrence of NullPointerException in real time. It is also possible to differentiate between nullable references and non-nullable references.
+●	Elvis Operator is used for handling null expectations in Kotlin. 
+●	Kotlin puts a lot of weight behind null safety which is an approach to prevent the dreaded Null Pointer Exceptions by using nullable types which are like String?, Int?, Float? etc. These act as a wrapper type and can hold null values. A nullable value cannot be added to another nullable or basic type of value.
+62.	ANR (Application Not Responding)
+●	 we are given two cases for an ANR to happen.
+●	Have a long-running task on the main thread with more than 5 seconds of execution
+●	If there is no response for an input event for 5 seconds then it’s going to be an ANR. (For instance you press a key on keyboard and there is no response for 5 seconds)
+●	Secondly, assume that you have a BroadcastReceiver. By the time it receives a broadcast, it has 10 seconds to finish it’s execution. Otherwise it’s going to be an ANR also.
+●	Stop doing heavy jobs on main thread. Instead use worker threads such as IntentService, AsyncTask or another Thread.
+●	The app is doing slow operations on main thread. (Including I/O)
+●	App is doing a long calculation on main thread.
+●	The main thread is doing a synchronous binder call to another process and that process is doing a heavy job.
+●	The main thread is blocked waiting for another process which is doing a long job.
+●	The main thread is in a deadlock with another thread.
+
+63.	Memory leak
+●	Android is a managed memory environment, As a developer you don’t need to take care of allocating, deallocating memory yourself, Garbage Collector takes care of freeing up objects that are no longer needed. But GC can’t free up objects which are still getting referenced, it results in precious memory not getting freed. These non freed objects are called leaks.
+●	If your app has some serious memory leaks hidden under the hood, these short GCs will not be able to reclaim the memory, and the heap will keep on increasing, which will force a larger GC to kick off. This larger GC, called a “stop-the-world” GC, pauses the entire application main thread for around 50 ms to 100 ms. At this point, your app seriously lags and becomes almost unusable.
+64.	Singleton classes in Kotlin
+●	To use the singleton pattern for our class we must use the keyword object
+●	Singleton class is a class whose only one instance can be created at any given time, in one 
+●	JVM. A class can be made singleton by making its constructor privat
+65.	Static keyword in Kotlin
+●	NO. Kotlin doesn’t have the static keyword.
+●	To create static method in our class we use the companion object
+class A {
+  companion object {
+     fun a() : Int = 5
+  }
+}
+
+●	
+66.	"open" and "public" in Kotlin
+●	The open keyword means “open for extension“. The open annotation on a class is the opposite of Java's final: it allows others to inherit from this class.
+
+●	If you do not specify any visibility modifier, public is used by default, which means that your declarations will be visible everywhere. public is the default if nothing else is specified explicitly.
+
+67.	Overriding Methods in Kotlin 
+●	Unlike Java, Kotlin requires explicit annotations for overridable members (we call them open) and for overrides
+●	open modifier marks classes and methods as overridable. You need one per each method you want to be overridable
+●	Now marked as open, so it can be inherited.
+●	click() must be explicitly marked as open to be overridable.
+●	Because doubleClick() is not marked as open it maintains its default modifier, final, so when we try to override it, we get an error.
+●	override implies open in the super class, for that reason you need to add final if you want to stop allowing overrides in subclasses.
+
+●	open class Base {
+●	   open fun v() {}
+●	   fun nv() {}
+●	}
+●	class Derived() : Base() {
+●	   override fun v() {}
+●	}
+68.	Constructors in Kotlin
+●	constructor refers to a block of code which is used to initialize an object. It must  
+●	have the same name as that of the class. Also, it has no return type and it is automatically  called when an object is created.
+●	Constructors in Kotlin are of two types:
+●	Primary – These are defined in the class headers. They cannot hold any logic. There’s only one primary constructor per class.
+●	Secondary – They’re defined in the class body. They must delegate to the primary constructor if it exists. They can hold logic. There can be more than one secondary constructors.
+
+69.	inheritance in kotlin
+●	By default classes are final in Kotlin. To make them non-final, you need to add the open modifier
+●	By default, a class always extends from Any (similar to Java Object), but we can extend any other classes.
+●	Any is not java.lang.Object; in particular, it does not have any members other than equals(), hashCode() and toString().
+●	Classes are closed by default (final), so we can only extend a class if it’s explicitly declared as open or abstract
+●	
+70.	Suspending vs blocking in kotlin
+●	A blocking call to a function means that a call to any other function, from the same thread, will halt the parent’s execution. Following up, this means that if you make a blocking call on the main thread’s execution, you effectively freeze the UI. Until that blocking call finishes, the user will see a static screen, which is not a good thing.
+
+●	Suspending doesn’t necessarily block your parent function’s execution. If you call a suspending function in some thread, you can easily push that function to a different thread. In case it is a heavy operation, it won’t block the main thread. If the suspending function has to suspend, it will simply pause its execution. This way you free up its thread for other work. Once it’s done suspending, it will get the next free thread from the pool, to finish its work.
+
+71.	Sealed Classes in Kotlin
+●	In the enum we only have one object per type, the sealed classes we can have several objects of the same class
+●	sealed classes allow you to represent hierarchies. 
+●	The child classes can be any type of class: 
+●	a data class, an object, a regular class or even another sealed class.
+●	 Unlike abstract classes, you have to define these hierarchies in the same file or as nested classes
+●	That means, we have a class with a specific number of subclasses. 
+●	It's very similar to an enum. 
+●	Enum classes only allow a single instance of each value and can’t encode more information on each type, 
+●	You could use an abstract class and a number of extensions but this loses the restricted set of types advantages brought by enum.  e.g. an Error case having an associated Exception property
+●	Sealed classes provide the best of both worlds: 
+●	the freedom of representation of abstract classes and the restricted set of types of enums 
+●	we need to represent a limited set of possibilities; a web request either succeeds or fails
+●	Sealed Classes in Kotlin is a new concept which we don’t have in traditional Java. Sealed class is sort of an extension to the traditional ENUM classes. 
+●	sealed classes we can have several objects of the same class.
+●	Creating a sealed class is as easy as adding the sealed modifier to the class. 
+●	All derived classes of the sealed class must be nested or on the same file
+
+72.	AsyncTask and the lifecycle of an Activity
+●	An AsyncTask is not tied to the lifecycle of the Activity that contains it. If the Activity is destroyed and a new instance of the Activity is created, the AsyncTask won’t be destroyed. This can lead to a number of problems, but the major ones an Android developer should be aware of are:
+●	
+
+●	Once the AsyncTask completes, it’ll try to update the former instance of the Activity, resulting in an IllegalArgumentException.
+●	Since the AsyncTask maintains a reference to the previous instance of the Activity, that Activity won’t be garbage collected, resulting in a memory leak.
+●	The solution is to avoid using AsyncTasks for long-running background tasks.
+
+73.	Serializable v/s Parcelable?
+●	 Serializable 
+●	 Serializable is a standard Java interface that’s easy to integrate into your app, as it doesn’t require any methods. Despite being easy to implement, Serializable uses the Java reflection API, which makes it a slow process that creates lots of temporary objects.
+●	Serializable is going to convert an object to byte stream. So the user can pass the data between one activity to another activity. The main advantage of serializable is the creation and passing data is very easy but it is a slow process compared to parcelable.
+●	 Parcelable
+●	Parcelable is optimized for Android, so it’s faster than Serializable. It’s also fully customizable, so you can be explicit about the serialization process, which results in less garbage objects.
+●	Parcel able is going to convert objects to byte streams and pass the data between two activities. Writing parcel able code is a little bit complex compared to serialization. It doesn’t create more temp objects while passing the data between two activities.
+
+74.	Collections and sequences in Kotlin
+●	The difference between eager and lazy evaluation lies in when each transformation on the collection is performed.
+●	Collections are eagerly evaluated — each operation is performed when it’s called and the result of the operation is stored in a new collection. The transformations on collections are inline functions. For example, looking at how map is implemented, we can see that it’s an inline function, that creates a new ArrayList:
+●	Sequences are lazily evaluated. They have two types of operations: intermediate and terminal. Intermediate operations are not performed on the spot; they’re just stored. Only when a terminal operation is called, the intermediate operations are triggered on each element in a row and finally, the terminal operation is applied. Intermediate operations (like map, distinct, groupBy etc) return another sequence whereas terminal operations (like first, toList, count etc) don’t.
+●	Collection operations use inline functions, so the bytecode of the operation, together with the bytecode of the lambda passed to it will be inlined. Sequences don’t use inline functions, therefore, new Function objects are created for each operation.
+●	On the other hand, collections create a new list for every transformation while sequences just keep a reference to the transformation function.
+
+75.	What is Elvis operator in Kotlin
+●	In Kotlin, you can assign null values to a variable by using the null safety property. To check if a value is having null value then you can use if-else or can use the Elvis operator i.e. ?
+76.	App Security Provide AES
+●	The Android operating system has lots of built-in security features, such as application sandboxing, protection against buffer and integer overflow attacks, and segregated memory areas for program instructions and data. As a result, simple Android apps that don't perform any file system or networking operations can often be considered secure by default.
+●	One solution I used a while back is to have the server generate a "ticket" which it passes back to the device, which is good for a certain period of time. This ticket is used by the device for all communication, using SSL of course so people can't steal your ticket. This way, the user authenticates their password on the server once, the server sends back an expiring ticket, and the password is never stored anywhere on the device
+●	Several three-legged authentication mechanisms, like OpenID, Facebook, even Google APIs, use this mechanism. The downsides are that every once in a while, when the ticket expires, the user needs to re-log in.
+●	Use Internal Storage for Sensitive Data
+●	Every Android app has an internal storage directory associated with it whose path is based on the package name of the app. Files inside this directory are very secure because we use the MODE_PRIVATE file creation mode by default. This means the files cannot be accessed by any other app on the device. Therefore, it is the best place to store all the sensitive data of your app in the internal storage directory
+●	Encrypt Data on External Storage
+●	The internal storage capacity of an Android device is often limited. Therefore, at times, you might have no choice but to store sensitive data on external storage media, such as a removable SD card.
+●	
+●	Because data on external storage media can be directly accessed by both users and other apps on the device, it is important that you store it in an encrypted format. One of the most popular encryption algorithms used by developers today is AES, short for Advanced Encryption Standard, with a key size of 256 bits.
+●	
+●	Writing code to encrypt and decrypt your app's data using the javax.crypto package, which is included in the Android SDK, can be confusing. Therefore, most developers prefer using third party libraries, such as Facebook's Conceal library, which are usually much easier to work with.
+●	Use Intents for IPC
+●	Experienced programmers who are new to Android application development often try to use sockets, named pipes, or shared files to asynchronously communicate with other apps installed on an Android device. These approaches are not only hard and inelegant, but also prone to threats. An easier and more secure approach to interprocess communication on the Android operating system is to use intents.
+●	To send data to a specific component of an app, you must create a new instance of the Intent class and use its setComponent() method to specify both the package name of the app and the name of the component. You can then add data to it using the putExtra() method.
+●	To send data to multiple apps at once, you can send the intent as a broadcast using the sendBroadcast() method. However, by default, a broadcast can be read by any app that has an appropriately configured BroadcastReceiver.
+●	
+●	Therefore, if you want to send sensitive information as a broadcast, you must use a custom permission whose protectionLevel is set to signature. By doing so, the Android operating system makes sure that only apps that were signed using your signing key can receive the broadcast.
+●	Use HTTPS
+●	All communications between your app and your servers must be over an HTTPS connection, preferably using the HttpsURLConnection class. If you think using HTTP for data that is not confidential is fine, think again.
+●	
+●	Many Android users connect to several open Wi-Fi hotspots in public areas every day. Some of those hotspots could be malicious. A malicious hotspot can easily alter the contents of HTTP traffic to make your app behave in an unexpected manner, or worse still, inject ads or exploits into it.
+●	
+●	By using HTTPS, as long as the server is configured with a certificate issued by a trusted certificate authority, such as DigiCert or GlobalSign, you can be sure that your network traffic is secure against both eavesdropping and man-in-the-middle attacks
+●	Use GCM Instead of SMS
+●	Back when GCM, short for Google Cloud Messaging, didn't exist, many developers were using SMS to push data from their servers to their apps. Today, this practice is largely gone.
+●	
+●	If you are one of those developers who still hasn't made the switch from SMS to GCM, you must know that the SMS protocol is neither encrypted nor safe against spoofing attacks. What's more, an SMS can be read by any app on the user's device that has the READ_SMS permission.
+●	
+●	GCM is a lot more secure and is the preferred way to push messages to an app because all GCM communications are encrypted. They are authenticated using regularly refreshed registration tokens on the client side and a unique API key on the server side. 
+●	Avoid Asking for Personal Data
+●	User privacy is given a lot of importance these days. In fact, there are laws, such as the European Union's Data Protection Directive and Canada's Personal Information Protection and Electronic Documents Act, which mandate the protection of the privacy of a user. Therefore, unless you have a good reason and a very secure infrastructure to collect, store, and transmit personal user information, you must avoid directly asking for it in your apps.
+●	Use ProGuard Before Publishing
+●	Security measures built into an Android app can be severely compromised if attackers are able to get their hands on the source code. Before you publish your app, it is recommended to make use of a tool called ProGuard, which is included in the Android SDK, to obfuscate and minify source code.
+●	Android Studio automatically includes ProGuard in the build process if the buildType is set to release. The default ProGuard configuration available in the Android SDK's proguard-android.txt file is sufficient for most apps. If you want to add custom rules to the configuration, you can do so inside a file named proguard-rules.pro, which is a part of every Android Studio project.
+●	App’s Code Security
+●	Mobile software security needs to be a priority.
+●	Native apps are different from web applications, where software and data exist securely on a server, and the client-side is just an interface. However, with native apps, that code resides on the device once it’s downloaded. But this makes it more accessible to those with malicious intent.
+●	When it comes to the app’s source code, there are many vulnerabilities, but that is not where businesses focus their security spending.
+●	Data security and network components are essential parts when the overall security picture is concerned
+●	
+77.	What is Agile?
+●	 Agile is an approach to software development under which requirements and solution evolve through the collaborative effort of self-organizing 
+●	and cross-functional teams and their customer/end user.
+●	Both development and testing activities are concurrent unlike the waterfall model.
+
+➢	Epic, Story, Task
+
+1.	Epic( Defines the business needs)
+2.	Feature (Story)(Defines the customer needs)
+3.	 Task (Defines the Solution)
+
+
+➢	Agile Process
+-------------
+●	Epic: High Level(Huge Requirement)
+●	Ex: As a user I need to us online banking Application
+●	
+●	Story1: As a user i can login into online banking application
+●	Story2: As a user I Can check my balance in my account 
+
+➢	Dev Tasks
+--------------
+●	Review the story
+●	Estimate the story
+●	Design
+●	Code 
+●	unit Testing 
+●	Integration etc.....
+
+➢	QA
+----------
+●	Review the story
+●	test cases
+●	test Scenarios
+●	Test Data
+●	Reviews
+●	Test Environments
+●	Execute test cases
+●	report bugs
+●	etc.....
+
+➢	Agile Roles
+---------------
+●	Product Owner--> Responsible for getting the requirements from the customer/ stakeholders
+●	Define the features of the product 
+●	decide on release data and content 
+●	prioritize features according to market value
+●	adjust features and priority every iteration, as needed
+●	accept or reject work results.
+
+78.	CI/CD (Jenkins & GitLab)
+●	Developers check the code locally and commit changes to the repository.
+●	Repository sends a request (web-hook) to CI system
+●	CI server runs job, which will generate a build and run tests to ensure your code works as expected.
+●	Finally deploy the APK file to production(Google Play Store)
+ 
+●	Source control : GitLab
+●	CI server : Jenkins
+●	Pipeline Script
+●	Pipeline Script From SCM
+●	Build distribution : Beta
+●	
+
+    
+
+79.	Sencer Phone
+●	Position sensors or accelerometer sensors
+●	Well, your device probably has multiple sensors that give various information. GPS, audio (i.e. microphones), image (i.e. cameras), direction (i.e. compasses) and acceleration sensors are very common nowadays.
+●	We will use data collected from accelerometer sensors. Virtually every modern smartphone has a tri-axial accelerometer that measures acceleration in all three spatial dimensions. Additionally, accelerometers can detect device orientation
+●	We will train an LSTM Neural Network (implemented in TensorFlow) for Human Activity Recognition (HAR) from accelerometer data. The trained model will be exported/saved and added to an Application
+●	Activity Recognition API
+●	a kilometer finder app starts running when you start Running and stops when you stop Running. By doing this, the app can find the distance that you Running on a particular day
+●	Another application of this Activity Recognition can be any Health and Fitness app that determines how many meters or kilometers you are running or walking on a particular day and after that, you can find the calories burnt on that day.
+●	https://blog.mindorks.com/activity-recognition-in-android-still-walking-running-driving-and-much-more
+80.	
+
+
+
