@@ -1,3 +1,6 @@
 # Android Application Developer Interview content.
 
-  - Android developer Interview questions and answers.
+
+
+  
+![kkkrt](https://github.com/srbbans/shared/blob/main/kab_kkrt.jpg?raw=true)
